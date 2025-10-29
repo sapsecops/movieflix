@@ -1,44 +1,105 @@
-Project-1 ==> Achieve Path-Based Routing Using AWS Application Load Balancer
+# Launch Infra for Movieflix Micrroservices
 
-        Step:1 ==> Create 3 Ec2 Instances 
-                        1. Instance-1 ==> Install Nginx and Deploy Homepage Code
-                        2. Instance-2 ==> Install Nginx and Deploy Movies Code
-                        2. Instance-3 ==> Install Nginx and Deploy Songs Code
+```
+Launch 3 "t2.micro" Ec2 Instances 
+```
 
-        Step:2 ==> Create Target Group
-        Step:3 ==> Create AWS Application Load Balancer and achieve the Path-Based Routing
+# Install Nginx
+### Using Amazon Linux 2 HERE 
+Login to all 3 Ec2 Instance and Install Nginx
+```
+sudo yum update -y
+sudo yum install git nginx -y
+sudo systemctl enable nginx
+sudo systemctl start nginx
+```
+# Setup Project
+## Remove Default Nginx Content
+Login to all 3 Ec2 Instance and Install Nginx
+```
+cd /usr/share/nginx/html
+sudo rm -rf *
+```
+## Get the Project Code
 
-                Achieve this
+### Steps at "Homepage" Instance
+```
+cd /tmp
+git clone https://github.com/digistackops-project-org/MovieFlix-Project.git
+cd MovieFlix
+sudo git checkout movieflix-micro
+sudo rm -rf games/ movies/ songs/
+sudo mv * /usr/share/nginx/html
+```
+### Steps at "Movies" Instance
+```
+cd /tmp
+git clone https://github.com/digistackops-project-org/MovieFlix-Project.git
+cd MovieFlix
+git checkout movieflix-micro
+cd movies
+sudo mv * /usr/share/nginx/html
+```
+### Steps at "Songs" Instance
+```
+cd /tmp
+git clone https://github.com/digistackops-project-org/MovieFlix-Project.git
+cd MovieFlix
+git checkout movieflix-micro
+cd songs
+sudo mv * /usr/share/nginx/html
+```
 
-	                1. When i hit filmy.com ==> it will redirect to Home page
-	                2. when i hit filmy.com/movies ==> it will redirect to Movies page
-	                3. when i hit filmy.com/songs ==> it will redirect to songs page
+## Check your App Working or Not
 
-        Step:4 ==> Create AWS Application Load Balancer and achieve the Host-Based Routing
+```
+http://<HomePage-Public-IP>/
+http://<Movies-Public-IP>/
+http://<songs-Public-IP>/
+```
+# Requirment ==> Host-Based Routing
+When we hit 
+```
+http://<Public-IP>/  ==> it will show Homepage
+http://<Public-IP>/songs  ==> it will show Songs Page
+http://<Public-IP>/movies  ==> it will show Movies page
+http://<Public-IP>/games  ==> it will show Games page
+```
+# Here we use "Reverse Proxy" Concept To achieve
 
-                 Achieve this
+In nginx.conf file we need to mention the proxy_pass of the songs, movies, games
 
-   			1. When i hit filmy.com ==> it will redirect to Home page
-	                2. when i hit movies.filmy.com ==> it will redirect to Movies page
-	                3. when i hit songs.filmy.com ==> it will redirect to songs page
+```
+    location /movies/ {
+        proxy_pass http://<movies-private-IP>:80/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
 
+    location /songs/ {
+        proxy_pass http://<songs-private-IP>:80/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+```
 
-Project-2 ==> Achieve Path-Based Routing Using AWS Application Load Balancer in EKS Using Ingress
-        
-        Step:1 ==> Create Docker Images of your Homepage, movies, games, songs
-        Step:2 ==> Create EKS Cluster
-	Step:3 ==> Deploy your Home page 
-        Step:4 ==> Deploy your Movies page
-        Step:5 ==> Deploy your Songs page 
-        Step:6 ==> Deploy Ingress Controller
-       
-        # We learn ALB Load Balancer using Ingress
-        Step:7 ==> Deploy ALB Ingress Object  [Achieve the Path-Based Routing using Ingress]
-                        1. When i hit filmy.com ==> it will redirect to Home page
-                        2. when i hit filmy.com/movies ==> it will redirect to Movies page
-                        3. when i hit filmy.com/songs ==> it will redirect to songs page
-        Step:8 ==> Deploy ALB  Ingress Object  [Achieve the Host Routing using Ingress]
-                        1. When i hit filmy.com ==> it will redirect to Home page
-	                2. when i hit movies.filmy.com ==> it will redirect to Movies page
-	                3. when i hit songs.filmy.com ==> it will redirect to songs page
-        # We learn NLB Load Balancer using Ingress
+We  already have "nginx.conf" file so Copy that file in the Nginx PATH "/etc/nginx/nginx.conf"
+
+```
+sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+sudo cp /usr/share/nginx/html/nginx.conf /etc/nginx/nginx.conf
+sudo systemctl restart nginx
+```
+
+## Check your App Working or Not
+
+```
+http://<HomePage-Public-IP>/  ==> it will show Homepage
+http://<HomePage-Public-IP>/songs  ==> it will show Songs Page
+http://<HomePage-Public-IP>/movies  ==> it will show Movies page
+http://<HomePage-Public-IP>/games  ==> it will show Games page
+```
