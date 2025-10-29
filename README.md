@@ -1,44 +1,49 @@
-Project-1 ==> Achieve Path-Based Routing Using AWS Application Load Balancer
+## Project Structure
+<img width="206" height="250" alt="image" src="https://github.com/user-attachments/assets/2904e648-bf52-4696-98c0-04965300a4b2" />
 
-        Step:1 ==> Create 3 Ec2 Instances 
-                        1. Instance-1 ==> Install Nginx and Deploy Homepage Code
-                        2. Instance-2 ==> Install Nginx and Deploy Movies Code
-                        2. Instance-3 ==> Install Nginx and Deploy Songs Code
+## Step-1: Build the Docker Images for Each Application
 
-        Step:2 ==> Create Target Group
-        Step:3 ==> Create AWS Application Load Balancer and achieve the Path-Based Routing
+#### Movies
+cd movies
+```
+docker build -t sapsecops/movieflix-micro:moviesV1 .
+```
 
-                Achieve this
+#### Songs
+cd songs
+```
+docker build -t sapsecops/movieflix-micro:songsV1 .
+```
+#### Homepage
+cd homepage
+```
+docker build -t sapsecops/movieflix-micro:homepageV1 .
+```
 
-	                1. When i hit filmy.com ==> it will redirect to Home page
-	                2. when i hit filmy.com/movies ==> it will redirect to Movies page
-	                3. when i hit filmy.com/songs ==> it will redirect to songs page
+## Step-2: Create private Docker network for our Movieflix Application
 
-        Step:4 ==> Create AWS Application Load Balancer and achieve the Host-Based Routing
-
-                 Achieve this
-
-   			1. When i hit filmy.com ==> it will redirect to Home page
-	                2. when i hit movies.filmy.com ==> it will redirect to Movies page
-	                3. when i hit songs.filmy.com ==> it will redirect to songs page
+##### To connect containers without IPs, use a bridge network:
+```
+docker network create movieflix-network
+```
 
 
-Project-2 ==> Achieve Path-Based Routing Using AWS Application Load Balancer in EKS Using Ingress
-        
-        Step:1 ==> Create Docker Images of your Homepage, movies, games, songs
-        Step:2 ==> Create EKS Cluster
-	Step:3 ==> Deploy your Home page 
-        Step:4 ==> Deploy your Movies page
-        Step:5 ==> Deploy your Songs page 
-        Step:6 ==> Deploy Ingress Controller
-       
-        # We learn ALB Load Balancer using Ingress
-        Step:7 ==> Deploy ALB Ingress Object  [Achieve the Path-Based Routing using Ingress]
-                        1. When i hit filmy.com ==> it will redirect to Home page
-                        2. when i hit filmy.com/movies ==> it will redirect to Movies page
-                        3. when i hit filmy.com/songs ==> it will redirect to songs page
-        Step:8 ==> Deploy ALB  Ingress Object  [Achieve the Host Routing using Ingress]
-                        1. When i hit filmy.com ==> it will redirect to Home page
-	                2. when i hit movies.filmy.com ==> it will redirect to Movies page
-	                3. when i hit songs.filmy.com ==> it will redirect to songs page
-        # We learn NLB Load Balancer using Ingress
+## Step-3: Run the Container 
+
+Here we are using Microservice Application, in nginx.conf we use reverse proxy to the movies-app, songs-app, games-app
+
+So first we need to Launch that Applications --> Later we Deploy the Homepage Application
+
+##### Run the Movies App Container
+```
+docker run -d --name movies-app --network movieflix-network sapsecops/movieflix-micro:moviesV1
+```
+
+##### Run the Songs App Container
+```
+docker run -d --name songs-app --network movieflix-network sapsecops/movieflix-micro:songsV1
+```
+##### Run the Homepage App Container
+```
+docker run -d --name homepage --network movieflix-network -p 80:80 sapsecops/movieflix-micro:homepageV1
+```
