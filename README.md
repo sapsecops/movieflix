@@ -26,7 +26,7 @@ sudo rm -rf *
 ```
 cd /tmp
 git clone https://github.com/sapsecops/movieflix.git
-cd movieFlix
+cd movieflix
 sudo git checkout 03-movieflix-micro
 sudo rm -rf games/ movies/ songs/
 sudo mv * /usr/share/nginx/html
@@ -35,8 +35,8 @@ sudo mv * /usr/share/nginx/html
 ```
 cd /tmp
 git clone https://github.com/sapsecops/movieflix.git
-cd movieFlix
-git checkout m03-movieflix-micro
+cd movieflix
+git checkout 03-movieflix-micro
 cd movies
 sudo mv * /usr/share/nginx/html
 ```
@@ -44,9 +44,18 @@ sudo mv * /usr/share/nginx/html
 ```
 cd /tmp
 git clone https://github.com/sapsecops/movieflix.git
-cd movieFlix
+cd movieflix
 git checkout 03-movieflix-micro
 cd songs
+sudo mv * /usr/share/nginx/html
+```
+### Steps at "Games" Instance
+```
+cd /tmp
+git clone https://github.com/sapsecops/movieflix.git
+cd movieflix
+git checkout 03-movieflix-micro
+cd games
 sudo mv * /usr/share/nginx/html
 ```
 
