@@ -1,44 +1,79 @@
-Project-1 ==> Achieve Path-Based Routing Using AWS Application Load Balancer
+# Install Nginx
+### Using Amazon Linux 2 HERE 
 
-        Step:1 ==> Create 3 Ec2 Instances 
-                        1. Instance-1 ==> Install Nginx and Deploy Homepage Code
-                        2. Instance-2 ==> Install Nginx and Deploy Movies Code
-                        2. Instance-3 ==> Install Nginx and Deploy Songs Code
+```
+sudo yum update -y
+sudo yum install git nginx -y
+sudo systemctl enable nginx
+sudo systemctl start nginx
+```
+# Setup Project
 
-        Step:2 ==> Create Target Group
-        Step:3 ==> Create AWS Application Load Balancer and achieve the Path-Based Routing
+## Remove Default Nginx Content
+```
+cd /usr/share/nginx/html
+sudo rm -rf *
+```
+## Get the Project Code
+```
+cd /tmp
+git clone https://github.com/digistackops-project-org/MovieFlix-Project.git
+cd movieflix
+git checkout movieflix-mono
+sudo mv * /usr/share/nginx/html
+```
 
-                Achieve this
+## Check your App Working or Not
 
-	                1. When i hit filmy.com ==> it will redirect to Home page
-	                2. when i hit filmy.com/movies ==> it will redirect to Movies page
-	                3. when i hit filmy.com/songs ==> it will redirect to songs page
+```
+http://<Public-IP>/
+http://<Public-IP>/songs/index.html
+http://<Public-IP>/movies/index.html
+http://<Public-IP>/games/index.html
+```
+# Requirment ==> PATH-Based Routing
 
-        Step:4 ==> Create AWS Application Load Balancer and achieve the Host-Based Routing
+When we hit 
+```
+http://<Public-IP>/  ==> it will show Homepage
+http://<Public-IP>/songs  ==> it will show Songs Page
+http://<Public-IP>/movies  ==> it will show Movies page
+http://<Public-IP>/games  ==> it will show Games page
+```
+# To achieve these we need to configure the "nginx.conf" file
 
-                 Achieve this
+In nginx.conf file we need to mention the alias of the songs, movies, games
 
-   			1. When i hit filmy.com ==> it will redirect to Home page
-	                2. when i hit movies.filmy.com ==> it will redirect to Movies page
-	                3. when i hit songs.filmy.com ==> it will redirect to songs page
+```
+        location /movies {
+            alias /usr/share/nginx/html/movies/;
+            index index.html;
+        }
 
+        location /songs {
+            alias /usr/share/nginx/html/songs/;
+            index index.html;
+        }
 
-Project-2 ==> Achieve Path-Based Routing Using AWS Application Load Balancer in EKS Using Ingress
-        
-        Step:1 ==> Create Docker Images of your Homepage, movies, games, songs
-        Step:2 ==> Create EKS Cluster
-	Step:3 ==> Deploy your Home page 
-        Step:4 ==> Deploy your Movies page
-        Step:5 ==> Deploy your Songs page 
-        Step:6 ==> Deploy Ingress Controller
-       
-        # We learn ALB Load Balancer using Ingress
-        Step:7 ==> Deploy ALB Ingress Object  [Achieve the Path-Based Routing using Ingress]
-                        1. When i hit filmy.com ==> it will redirect to Home page
-                        2. when i hit filmy.com/movies ==> it will redirect to Movies page
-                        3. when i hit filmy.com/songs ==> it will redirect to songs page
-        Step:8 ==> Deploy ALB  Ingress Object  [Achieve the Host Routing using Ingress]
-                        1. When i hit filmy.com ==> it will redirect to Home page
-	                2. when i hit movies.filmy.com ==> it will redirect to Movies page
-	                3. when i hit songs.filmy.com ==> it will redirect to songs page
-        # We learn NLB Load Balancer using Ingress
+        location /games {
+            alias /usr/share/nginx/html/games/;
+            index index.html;
+        }
+```
+
+We  already have "nginx.conf" file so Copy that file in the Nginx PATH "/etc/nginx/nginx.conf"
+
+```
+sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+sudo cp /usr/share/nginx/html/nginx.conf /etc/nginx/nginx.conf
+sudo systemctl restart nginx
+```
+
+## Check your App Working or Not
+
+```
+http://<Public-IP>/  ==> it will show Homepage
+http://<Public-IP>/songs  ==> it will show Songs Page
+http://<Public-IP>/movies  ==> it will show Movies page
+http://<Public-IP>/games  ==> it will show Games page)
+```
