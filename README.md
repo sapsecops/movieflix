@@ -85,6 +85,14 @@ In nginx.conf file we need to mention the proxy_pass of the songs, movies, games
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
+
+    location /games/ {
+        proxy_pass http://<games-private-IP>:80/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
 ```
 
 We  already have "nginx.conf" file so Copy that file in the Nginx PATH "/etc/nginx/nginx.conf"
